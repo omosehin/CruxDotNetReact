@@ -1,12 +1,13 @@
 ﻿using Microsoft.AspNetCore.Identity;
-using System.Collections;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace CruxDotNetReact.Models
 {
-    public class AppUser :IdentityUser
+    public class Role :IdentityRole<string>
     {
-       public string DisplayName { get; set; }
         public virtual ICollection<UserRole> UserRoles { get; set; }
 
     }

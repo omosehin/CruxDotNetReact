@@ -16,29 +16,32 @@ namespace CruxDotNetReact.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly UserManager<AppUser> _userManager;
-        private readonly SignInManager<AppUser> _signInManager;
+       
+        private readonly IAuth _auth;
         private readonly IJwtGenerator _jwtGenerator;
 
-        public AuthController(UserManager<AppUser> userManager,SignInManager<AppUser> signInManager, IAuth auth, IJwtGenerator jwtGenerator)
+        public AuthController( IAuth auth, IJwtGenerator jwtGenerator)
         {
-            _userManager = userManager;
-            _signInManager = signInManager;
+            _auth = auth;
             _jwtGenerator = jwtGenerator;
-            //    _auth = auth; 
+        }
+
+        [HttpPost("register")]
+        public async Task<IActionResult> Register(RegisterUserDto users)
+        {
+            var user =await _auth.RegisterUser(users.Email,users.Password,users.PhoneNumber,users.Username);
+            return Ok(new{
+
+                SuccessMessage =String.Format(user.UserName,"{0}created Successfully")
+            }) ;
         }
 
        [HttpPost("login")]
        public async Task<IActionResult> LoginUser(LoginUserDto users)
         {
-            var user = await _userManager.FindByEmailAsync(users.email);
+            var user = await _auth.LoginUser(users.email, users.password);
 
-            if (user == null)
-                throw new RestException(HttpStatusCode.Unauthorized, new { User = "username is wrong" });
-
-            var result = _signInManager.CheckPasswordSignInAsync(user, users.password, false);
-
-            if (result.IsCompletedSuccessfully)
+            if (user !=null)
             {
                 return Ok(new {
                     Display_Name= user.DisplayName,

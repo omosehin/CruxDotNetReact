@@ -7,6 +7,7 @@ using CruxDotNetReact.Application.Error;
 using CruxDotNetReact.Data;
 using CruxDotNetReact.Interfaces;
 using CruxDotNetReact.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -36,7 +37,7 @@ namespace CruxDotNetReact.Controllers
         }
 
         [HttpGet("{id}")]
-
+        [Authorize]
         public async Task<IActionResult> GetHospital(int id)
         {
             var hospital = await _authRepo.Hospital(id);
