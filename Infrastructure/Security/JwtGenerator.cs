@@ -1,5 +1,6 @@
 ﻿using CruxDotNetReact.Interfaces;
 using CruxDotNetReact.Models;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using System;
@@ -14,13 +15,15 @@ namespace CruxDotNetReact.Infrastructure.Security
 {
     public class JwtGenerator : IJwtGenerator
     {
+        private readonly UserManager<User> _userManager;
         private readonly IConfiguration _config;
 
-        public JwtGenerator(IConfiguration config)
+        public JwtGenerator(UserManager<User> userManager, IConfiguration config)
         {
+            _userManager = userManager;
             _config = config;
         }
-        public string CreateToken(User user)
+        public async Task<string> CreateToken(User user)
         {
 
             var claims = new List<Claim>
@@ -28,6 +31,13 @@ namespace CruxDotNetReact.Infrastructure.Security
                 new Claim(JwtRegisteredClaimNames.NameId,user.UserName),
                 new Claim(JwtRegisteredClaimNames.Email,user.Email),
             };
+
+            var roles =await _userManager.GetRolesAsync(user);
+
+            foreach (var role in roles)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, role));
+            }
 
             //generate signing credentials
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config.GetSection("AppSettings:Token").Value)); //no of string should be 11 or 12
@@ -44,6 +54,8 @@ namespace CruxDotNetReact.Infrastructure.Security
             var token = tokenHandler.CreateToken(tokenDescriptor);
 
             return tokenHandler.WriteToken(token);
-        } 
+        }
+
+       
     }
 }

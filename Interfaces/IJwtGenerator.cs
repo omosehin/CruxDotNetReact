@@ -1,4 +1,5 @@
 ﻿using CruxDotNetReact.Models;
+using Microsoft.AspNetCore.Identity;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,6 +9,6 @@ namespace CruxDotNetReact.Interfaces
 {
     public interface IJwtGenerator
     {
-        string CreateToken(User user);
+         Task<string> CreateToken( User user);
     }
 }
