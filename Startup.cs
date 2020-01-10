@@ -9,11 +9,13 @@ using CruxDotNetReact.Interfaces;
 using CruxDotNetReact.Middleware;
 using CruxDotNetReact.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -39,7 +41,23 @@ namespace CruxDotNetReact
                 opts.UseLazyLoadingProxies();
                 opts.UseSqlServer(Configuration.GetConnectionString
                     ("ConnectionString"));
-            }); 
+            });
+
+            IdentityBuilder builder = services.AddIdentityCore<User>(opt => {
+
+                opt.Password.RequireDigit = true;
+                opt.Password.RequiredLength = 7;
+                opt.Password.RequireNonAlphanumeric = false;
+                opt.Password.RequireUppercase = true;
+            });
+
+            builder = new IdentityBuilder(builder.UserType, typeof(Role), builder.Services);
+            builder.AddEntityFrameworkStores<DataContext>();
+            builder.AddRoleValidator<RoleValidator<Role>>();
+            builder.AddRoleManager<RoleManager<Role>>();
+            builder.AddSignInManager<SignInManager<User>>();
+
+          
             services.AddControllers();
             services.AddScoped<IHospitalRepo, HospitalRepo>();
             services.AddScoped<IAuth, Auth>();
@@ -47,10 +65,6 @@ namespace CruxDotNetReact
             services.AddCors();
 
 
-            var builder = services.AddIdentityCore<AppUser>();
-            var identityBuilder = new IdentityBuilder(builder.UserType, builder.Services);
-            identityBuilder.AddEntityFrameworkStores<DataContext>();
-            identityBuilder.AddSignInManager<SignInManager<AppUser>>();
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration.GetSection("AppSettings:Token").Value)); //no of string should be 11 or 12
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -65,6 +79,24 @@ namespace CruxDotNetReact
                     };
                 });
 
+            services.AddAuthorization(opts =>
+            {
+                opts.AddPolicy("RequiredAdminRole", policy => policy.RequireRole("Admin"));
+                opts.AddPolicy("CreateHospitalRole", policy => policy.RequireRole("Admin", "Doctor"));
+                opts.AddPolicy("PatientOnly", policy => policy.RequireRole("Patient"));
+                opts.AddPolicy("Visitor", policy => policy.RequireRole("Visitor"));
+            });
+
+            services.AddControllers
+                (options =>
+                {
+                    var policy = new AuthorizationPolicyBuilder()
+                        .RequireAuthenticatedUser()
+                        .Build();
+
+                    options.Filters.Add(new AuthorizeFilter(policy));
+                });
+            services.AddCors();
 
         }
 
@@ -90,7 +122,7 @@ namespace CruxDotNetReact
             {
                 endpoints.MapControllers();
             });
-            app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod());
+            app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
         }
     }
 }

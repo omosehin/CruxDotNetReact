@@ -24,10 +24,11 @@ namespace CruxDotNetReact
                 var services = scope.ServiceProvider;
                 try
                 {
-                    var userManager = services.GetRequiredService<UserManager<AppUser>>();
+                    var userManager = services.GetRequiredService<UserManager<User>>();
+                    var roleManager = services.GetRequiredService<RoleManager<Role>>();
                     var context = services.GetRequiredService<DataContext>();
                     context.Database.Migrate();
-                    Seed.SeedData(context,userManager).Wait();
+                    Seed.SeedData(context,userManager,roleManager).Wait();
 
                 }
                 catch (Exception ex)

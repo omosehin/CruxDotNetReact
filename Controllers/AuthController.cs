@@ -7,11 +7,13 @@ using CruxDotNetReact.Application.Error;
 using CruxDotNetReact.Dtos;
 using CruxDotNetReact.Interfaces;
 using CruxDotNetReact.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CruxDotNetReact.Controllers
 {
+    [AllowAnonymous]
     [Route("api/[controller]")]
     [ApiController]
     public class AuthController : ControllerBase

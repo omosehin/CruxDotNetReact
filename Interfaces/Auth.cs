@@ -13,12 +13,12 @@ namespace CruxDotNetReact.Interfaces
 {
     public class Auth : IAuth
     {
-        private readonly UserManager<AppUser> _userManager;
-        private readonly SignInManager<AppUser> _signInManager;
+        private readonly UserManager<User> _userManager;
+        private readonly SignInManager<User> _signInManager;
         private readonly IJwtGenerator _jwtGenerator;
         private readonly DataContext _context;
 
-        public Auth(UserManager<AppUser> userManager,SignInManager<AppUser> signInManager, IJwtGenerator jwtGenerator, DataContext context)
+        public Auth(UserManager<User> userManager,SignInManager<User> signInManager, IJwtGenerator jwtGenerator, DataContext context)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -27,7 +27,7 @@ namespace CruxDotNetReact.Interfaces
         }
        
 
-        public async Task<AppUser> LoginUser(string Email, string password)
+        public async Task<User> LoginUser(string Email, string password)
         {
 
             var user = await _userManager.FindByEmailAsync(Email);
@@ -48,9 +48,9 @@ namespace CruxDotNetReact.Interfaces
 
 
  
-        public async Task<AppUser> RegisterUser(string Email, string Password,string PhoneNumber ,string Username)
+        public async Task<User> RegisterUser(string Email, string Password,string PhoneNumber ,string Username)
         {
-            var userToCreate = new AppUser
+            var userToCreate = new User
             {
                 Email = Email,
                 UserName = Username,
@@ -66,7 +66,7 @@ namespace CruxDotNetReact.Interfaces
             
             if (user.Succeeded)
             {
-                return new AppUser { 
+                return new User { 
                       DisplayName = String.Format(userToCreate.UserName, "{0} is successfully created")
                 };
             }

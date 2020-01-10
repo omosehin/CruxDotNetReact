@@ -19,38 +19,40 @@ namespace CruxDotNetReact.Controllers
 
     public class HospitalController : ControllerBase
     {
-        private readonly IHospitalRepo _authRepo;
-        private readonly DataContext _context;
+        private readonly IHospitalRepo _repo;
 
-        public HospitalController(IHospitalRepo authRepo, DataContext context)
+        public HospitalController(IHospitalRepo repo)
         {
-            _authRepo = authRepo;
-            _context = context;
+            _repo = repo;
         }
 
 
         [HttpGet]
         public async Task<IActionResult> GetHospitals()
         {
-            var hospitals = await _authRepo.Hospital();
+            var hospitals = await _repo.Hospital();
             return Ok(hospitals);
         }
 
         [HttpGet("{id}")]
-        [Authorize]
+        //  [Authorize]
         public async Task<IActionResult> GetHospital(int id)
         {
-            var hospital = await _authRepo.Hospital(id);
+            if (id <= 0)
+            {
+                return BadRequest("Please specify a valid Id");
+            }
+            var hospital = await _repo.Hospital(id);
             if (hospital == null)
-                throw new RestException(HttpStatusCode.BadRequest);
+                return BadRequest("No hospital exist for the specified Id");
             return Ok(hospital);
         }
         [HttpPost]
         public async Task<IActionResult> CreateHospital(Hospital hosp)
         {
-            _authRepo.CreateOneHospital(hosp);
+            _repo.CreateOneHospital(hosp);
 
-            if (await _authRepo.SaveAll())
+            if (await _repo.SaveAll())
                 return Ok();
 
             return BadRequest("Failed to Create User");
@@ -58,22 +60,10 @@ namespace CruxDotNetReact.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> EditHospital(int id, Hospital hosp)
+        public async Task<IActionResult> EditHospital(int id)
         {
-            var hospital = await _context.Hospitals.FirstOrDefaultAsync(x => x.Id == id);
-
-            if (hospital == null)
-                throw new RestException(HttpStatusCode.BadRequest, new { User = "User not found" });
-
-
-            hospital.Location = hosp.Location;
-            hospital.Name = hosp.Name;
-            hospital.State = hosp.State;
-            hospital.Email = hosp.Email;
-            hospital.DateCreated = hosp.DateCreated;
-
-
-            if (await _authRepo.SaveAll())
+            var result = _repo.Hospital(id);
+            if (await _repo.SaveAll())
                 return Ok();
 
             return BadRequest("Failed to like User");
@@ -81,12 +71,9 @@ namespace CruxDotNetReact.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteHospital(int id)
         {
-            var hospital = await _context.Hospitals.FirstOrDefaultAsync(x => x.Id == id);
-            _authRepo.Delete(hospital);
-            if (hospital == null)
-                throw new RestException(HttpStatusCode.BadRequest, new { User = "User not found" });
+            _repo.Delete(id);
 
-            if (await _authRepo.SaveAll())
+            if (await _repo.SaveAll())
                 return Ok();
 
             return BadRequest("Failed to Delete User");

@@ -20,7 +20,7 @@ namespace CruxDotNetReact.Infrastructure.Security
         {
             _config = config;
         }
-        public string CreateToken(AppUser user)
+        public string CreateToken(User user)
         {
 
             var claims = new List<Claim>

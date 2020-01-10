@@ -8,7 +8,7 @@ namespace CruxDotNetReact.Interfaces
 {
     public interface IAuth
     {
-        Task<AppUser> RegisterUser(string Email, string Password,string PhoneNumber, string Username);
-        Task<AppUser> LoginUser(string Email, string password);
+        Task<User> RegisterUser(string Email, string Password,string PhoneNumber, string Username);
+        Task<User> LoginUser(string Email, string password);
     }
 }

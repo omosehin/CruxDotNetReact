@@ -8,6 +8,6 @@ namespace CruxDotNetReact.Interfaces
 {
     public interface IJwtGenerator
     {
-        string CreateToken(AppUser user);
+        string CreateToken(User user);
     }
 }

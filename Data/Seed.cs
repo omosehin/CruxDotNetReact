@@ -9,23 +9,35 @@ namespace CruxDotNetReact.Data
 {
     public class Seed
     {
-        public static async Task SeedData(DataContext context, UserManager<AppUser> userManager)
+        public static async Task SeedData(DataContext context,
+            UserManager<User> userManager, RoleManager<Role> roleManager)
         {
             if (!userManager.Users.Any())
             {
-                var users = new List<AppUser>
+                var roles = new List<Role>
                 {
-                    new AppUser
+                    new Role {Name = "Doctor"},
+                    new Role {Name = "Admin"},
+                    new Role {Name = "Patient"},
+                    new Role {Name = "Visitor"}
+                };
+
+                foreach (var role in roles)
+                {
+                    await roleManager.CreateAsync(role);
+                }
+
+                var users = new List<User>
+                {
+                    new User
                     {
-                        Id= "a",
                         DisplayName="Yinka",
                         UserName="Ojo",
-                        Email="ojo@gmail.com",
+                        Email="c",
                         PhoneNumber ="08142334567"
                     },
-                    new AppUser
+                    new User
                     {
-                        Id= "a",
                         DisplayName="Abayomi",
                         UserName="Oke",
                         Email="Oke@gmail.com",
@@ -33,16 +45,54 @@ namespace CruxDotNetReact.Data
                     }
                 };
 
+
                 foreach (var user in users)
                 {
-                    await userManager.CreateAsync(user, "Lsc1003177@");
+                    await userManager.CreateAsync(user, "Lsc1003177");
+                    await userManager.AddToRoleAsync(user, "Visitor");
+
+                }
+
+                //create patient user
+
+                var patientUser = new User
+                {
+                    UserName = "Patient"
+                };
+
+                var PResult = userManager.CreateAsync(patientUser, "Lsc1003177@").Result;
+                if (PResult.Succeeded)
+                {
+                    var patient = userManager.FindByNameAsync("Patient").Result;
+                    await userManager.AddToRoleAsync(patient, "Patient");
+                }
+
+                //create admin user
+
+                var adminUser = new User
+                {
+                    UserName = "Admin"
+                };
+
+
+
+                var result = userManager.CreateAsync(adminUser, "Lsc1003177@").Result;
+                if (result.Succeeded)
+                {
+                    var admin = userManager.FindByNameAsync("Admin").Result;
+                    await userManager.AddToRoleAsync(admin, "Admin");
+                    await userManager.AddToRoleAsync(admin, "Doctor");
                 }
             }
+
+
+
 
             if (!context.Hospitals.Any())
             {
                 var hospitals = new List<Hospital>
                 {
+
                    new Hospital
                    {
                        Name = "General Hospital",
@@ -68,9 +118,12 @@ namespace CruxDotNetReact.Data
                        State = "Lagos"
                    }
                 };
+
                 context.Hospitals.AddRange(hospitals);
                 context.SaveChanges();
             }
+
+
 
         }
     }

@@ -9,8 +9,9 @@ using System.Threading.Tasks;
 
 namespace CruxDotNetReact.Data
 {
-    public class DataContext : IdentityDbContext<AppUser,Role, string,IdentityUserClaim<string>,
-        UserRole,IdentityUserLogin<string>,IdentityRoleClaim<string>, IdentityUserToken<string>>
+    public class DataContext : IdentityDbContext<User, Role, int,
+        IdentityUserClaim<int>, UserRole, IdentityUserLogin<int>,
+        IdentityRoleClaim<int>, IdentityUserToken<int>>
     {
         public DataContext(DbContextOptions<DataContext> options) 
             : base(options)
@@ -24,6 +25,21 @@ namespace CruxDotNetReact.Data
             
             base.OnModelCreating(builder); //neccesary for Identity
 
+            builder.Entity<UserRole>(userRole =>
+            {
+                userRole.HasKey(ur => new { ur.UserId, ur.RoleId });
+
+                userRole.HasOne(ur => ur.Role)
+                .WithMany(r => r.UserRoles)
+                .HasForeignKey(ur => ur.RoleId)
+                .IsRequired();
+
+                 userRole.HasOne(ur => ur.User)
+                .WithMany(r => r.UserRoles)
+                .HasForeignKey(ur => ur.UserId)
+                .IsRequired();
+              
+            });
 
         }
     }
