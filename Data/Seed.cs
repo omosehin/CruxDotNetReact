@@ -33,7 +33,7 @@ namespace CruxDotNetReact.Data
                     {
                         DisplayName="Yinka",
                         UserName="Ojo",
-                        Email="c",
+                        Email="ojo@gmail.com",
                         PhoneNumber ="08142334567"
                     },
                     new User

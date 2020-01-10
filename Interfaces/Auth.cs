@@ -27,12 +27,12 @@ namespace CruxDotNetReact.Interfaces
         }
        
 
-        public async Task<User> LoginUser(string Username, string password)
+        public async Task<User> LoginUser(string Email, string password)
         {
 
-            var user = await _userManager.FindByNameAsync(Username);
+            var user = await _userManager.FindByEmailAsync(Email);
             if (user == null)
-                throw new RestException(HttpStatusCode.Unauthorized, new { User = "username is wrong" });
+                throw new RestException(HttpStatusCode.Unauthorized, new { User = "User is unauthorised" });
 
             var result = _signInManager.CheckPasswordSignInAsync(user, password, false);
 

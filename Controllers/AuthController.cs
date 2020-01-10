@@ -41,7 +41,7 @@ namespace CruxDotNetReact.Controllers
        [HttpPost("login")]
        public async Task<IActionResult> LoginUser(LoginUserDto users)
         {
-            var user = await _auth.LoginUser(users.Username, users.Password);
+            var user = await _auth.LoginUser(users.Email, users.Password);
 
             if (user !=null)
             {
