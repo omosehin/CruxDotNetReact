@@ -41,7 +41,7 @@ namespace CruxDotNetReact.Controllers
        [HttpPost("login")]
        public async Task<IActionResult> LoginUser(LoginUserDto users)
         {
-            var user = await _auth.LoginUser(users.email, users.password);
+            var user = await _auth.LoginUser(users.Username, users.Password);
 
             if (user !=null)
             {
@@ -49,7 +49,7 @@ namespace CruxDotNetReact.Controllers
                     Display_Name= user.DisplayName,
                     User_Name = user.UserName,
                     Phone_Number = user.PhoneNumber,
-                    token = _jwtGenerator.CreateToken(user),
+                    token = _jwtGenerator.CreateToken(user).Result,
                     Image=""
                 });
             }
